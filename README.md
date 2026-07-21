@@ -31,11 +31,13 @@ it never changes what a command *does*, only what the agent *reads*.
 `tersetrim git log -n 2` on this repo:
 
 ```
-EXAMPLE_PLACEHOLDER_REGENERATED_AT_PUBLISH
+[tersetrim] ~110->32 tok (70% saved)
+3cbb2eed4 chore: Terse Labs launch
+8a1879e9f tersetrim v0.2.0 — argv-safe token-optimizing command wrapper for AI coding agents
 ```
 
 The full multi-line `git log` (commit / Author / Date / blank / message per commit) becomes one
-`<short-hash> <subject>` line each — typically **80%+ fewer tokens**, no commit dropped.
+`<short-hash> <subject>` line each — **70% fewer tokens** even on this tiny 2-commit log (longer logs save more), no commit dropped.
 
 `git status` collapses to `N changed:` + one porcelain line per file; `ls -l` becomes `size  name`
 (perms/owner/date dropped); `docker ps` / `docker images` keep only the columns an agent reasons about
