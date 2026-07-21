@@ -17,7 +17,7 @@ to the signal, so every command costs the agent less.
 ## Quick start
 
 ```bash
-pip install -e .               # from the tersetrim/ dir; PyPI publish pending
+pip install tersetrim         # https://pypi.org/project/tersetrim/
 tersetrim git status           # runs it, prints a compact summary + a savings line on stderr
 tersetrim git log -n 20        # one line per commit
 tersetrim --stats              # cumulative tokens saved so far
