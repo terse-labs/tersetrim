@@ -101,14 +101,26 @@ def _pro_notice(cmd_key: str) -> None:
 # A git PORCELAIN status line: two status codes from the git set, a space, a path. Prose lines from
 # plain `git status` ("On branch main") do NOT match, so the compactor never counts prose as a file.
 _PORCELAIN = re.compile(r"^[ MADRCU?!]{2} \S")
+# Plain `git status` LONG format: file entries are the only TAB-indented lines ("\tmodified:   x";
+# untracked entries are a bare "\tpath"). Hint prose ('  (use "git add ...")') is space-indented.
+_LONG_STATUS = {"modified": "M", "new file": "A", "deleted": "D",
+                "renamed": "R", "copied": "C", "typechange": "T"}
+_LONG_ENTRY = re.compile(r"^\t(?:(modified|new file|deleted|renamed|copied|typechange):\s+)?(\S.*)$")
 
 
 def _compact_git_status(raw: str) -> str:
-    """`git status` -> one line per changed file + a count; passes prose through if no porcelain lines."""
-    files = [l for l in raw.splitlines() if _PORCELAIN.match(l)]
+    """`git status` -> one line per changed file + a count. Matches porcelain lines AND the long
+    format plain `git status` actually prints (tab-indented entries; bare tab line = untracked).
+    Prose never counts as a file; passes through if no entries recognised."""
+    files = [l.strip() for l in raw.splitlines() if _PORCELAIN.match(l)]
+    if not files:
+        for l in raw.splitlines():
+            m = _LONG_ENTRY.match(l)
+            if m:
+                files.append(f"{_LONG_STATUS.get(m.group(1), '??')} {m.group(2).strip()}")
     if not files:
         return "clean working tree" if "nothing to commit" in raw else raw
-    return f"{len(files)} changed:\n" + "\n".join(f"  {l.strip()}" for l in files)
+    return f"{len(files)} changed:\n" + "\n".join(f"  {l}" for l in files)
 
 
 def _compact_git_log(raw: str) -> str:
@@ -416,6 +428,16 @@ def _self_check_body() -> int:
     got = run(["git", "status"], _runner=lambda a: (0, raw))[1]
     assert got.startswith("2 changed") and "a.py" in got and "On branch" not in got, got
     assert run(["git", "status"], _runner=lambda a: (0, "nothing to commit, working tree clean\n"))[1] == "clean working tree"
+    # 2b. git status LONG format — what plain `git status` ACTUALLY prints (the porcelain fixture
+    #     above is not it; that gap shipped a 0%-savings flagship compactor in 0.3.0).
+    long_raw = ("On branch main\nChanges not staged for commit:\n"
+                '  (use "git add <file>..." to update what will be committed)\n'
+                "\tmodified:   a.py\n\tdeleted:    b.py\n\nUntracked files:\n"
+                '  (use "git add <file>..." to include in what will be committed)\n'
+                "\tnew_dir/\n\nno changes added to commit\n")
+    got = run(["git", "status"], _runner=lambda a: (0, long_raw))[1]
+    assert got.startswith("3 changed") and "M a.py" in got and "D b.py" in got \
+        and "?? new_dir/" in got and "(use" not in got and "On branch" not in got, got
     # 3. git log: multi-line -> one line per commit, never drops a commit
     glog = ("commit abc1234567\nAuthor: X\nDate: today\n\n    first subject\n\n"
             "commit def8901234\nAuthor: Y\nDate: today\n\n    second subject\n")
