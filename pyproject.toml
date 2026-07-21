@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tersetrim"
+version = "0.2.0"
+description = "Token-optimizing command wrapper for AI coding agents — compacts CLI output, argv-safe, no junk files."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+keywords = ["llm", "ai-agent", "cli", "tokens", "claude-code", "developer-tools"]
+authors = [{ name = "Terse Labs" }]
+dependencies = []                      # stdlib-only by design (ponytail: no deps for what argv+re do)
+
+[project.scripts]
+tersetrim = "tersetrim:main"
+
+[project.urls]
+Homepage = "https://github.com/terse-labs/tersetrim"
+
+[tool.setuptools]
+py-modules = ["tersetrim"]
