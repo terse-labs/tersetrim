@@ -53,9 +53,28 @@ tersetrim runs the **argv list directly** (`shell=False`), so the OS receives yo
 That class of bug is **structurally impossible** — on Windows, macOS, and Linux alike. Its self-check
 asserts exactly this: an argument containing `>` and `/` round-trips untouched and creates no file.
 
+## Pro
+
+The free tier is complete and stays free. **Pro** ($19 once, all v0.x) adds:
+
+- **More compactors** — `kubectl get`, `pip list`, `npm ls`, `git diff --stat`, `pytest`
+  (failures are never dropped — they're the point of reading test output)
+- **Savings analytics** — `--stats` gains a per-command breakdown, a 7-day trend, and a
+  dollar translation at *your* token rate (`TERSETRIM_USD_PER_MTOK`; we don't invent prices)
+
+```bash
+tersetrim --pro                 # what pro adds + the link
+tersetrim --activate YOUR-KEY   # verified once, cached, works offline forever after
+```
+
+**The honest print:** this source is MIT and public — including the pro code and its gate.
+A license key is how you pay for the work, not DRM. Free never degrades: an unlicensed pro
+command runs normally and passes through untouched, with at most one hint a day.
+
 ## Roadmap
 
-- **v0.2** — `docker ps` / `docker images` ✓; next: `kubectl`, `npm ls`, `pip list`, `git diff --stat`
+- **v0.2** — `docker ps` / `docker images` ✓
+- **v0.3** — pro tier: kubectl/pip/npm/git-diff/pytest compactors + savings analytics ✓
 - **v0.3** — a hook that auto-wraps an agent's commands (no per-command prefix)
 - **v0.4** — per-tool profiles + user-defined compactors
 - **v1.0** — a compactor plugin ecosystem
