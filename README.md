@@ -53,6 +53,53 @@ tersetrim runs the **argv list directly** (`shell=False`), so the OS receives yo
 That class of bug is **structurally impossible** — on Windows, macOS, and Linux alike. Its self-check
 asserts exactly this: an argument containing `>` and `/` round-trips untouched and creates no file.
 
+## Works with your agent CLI
+
+tersetrim is a plain command wrapper — any agent that runs shell commands can use it. Two
+invocations:
+
+```bash
+tersetrim git status            # console script (pip's Scripts dir must be on PATH)
+python -m tersetrim git status  # always works, zero PATH setup
+```
+
+> **Windows note:** `pip install --user` places `tersetrim.exe` in
+> `%APPDATA%\Python\PythonXY\Scripts`, which is often *not* on PATH. Use `python -m tersetrim`
+> or add that directory once.
+
+### aider — tested (aider 0.86.2)
+
+`/run` output is compacted *before* it enters the chat context:
+
+```
+/run python -m tersetrim git status
+```
+
+Receipt from a live session: `[tersetrim] ~47->6 tok (87% saved)` on the `/run` output line.
+To make it standing policy, put this line in a conventions file you load with
+`aider --read CONVENTIONS.md`:
+
+```
+When running read-only shell commands (git status/log, ls -l, docker ps),
+prefix them with `python -m tersetrim` to keep their output compact.
+```
+
+### codex CLI and Cline — one AGENTS.md line covers both
+
+Add the same policy line to your project's `AGENTS.md`. codex reads `AGENTS.md` at session
+start, and Cline auto-detects `AGENTS.md` alongside its own `.clinerules/` directory (per
+[Cline's rules docs](https://docs.cline.bot/customization/cline-rules), "standard format for
+cross-tool compatibility"):
+
+```
+Prefix verbose read-only commands (git status, git log, docker ps) with
+`python -m tersetrim` — it compacts their output and passes everything else through.
+```
+
+The wrapper is shell-level, so there is nothing agent-specific to install. (We publish savings
+numbers only from real runs; compaction varies with output shape — the `[tersetrim]` banner on
+every wrapped command shows the actual tokens saved, so your receipts are built in.)
+
 ## Pro
 
 The free tier is complete and stays free. **Pro** ($19 once, all v0.x) adds:
